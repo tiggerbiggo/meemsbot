@@ -1,4 +1,3 @@
-import com.sun.xml.internal.fastinfoset.alphabet.BuiltInRestrictedAlphabets;
 import com.tiggerbiggo.prima.calculation.ColorTools;
 import com.tiggerbiggo.prima.core.Builder;
 import com.tiggerbiggo.prima.core.FileManager;
@@ -6,22 +5,18 @@ import com.tiggerbiggo.prima.core.Vector2;
 import com.tiggerbiggo.prima.graphics.HueCycleGradient;
 import com.tiggerbiggo.prima.processing.fragment.generate.MapGenFragment;
 import com.tiggerbiggo.prima.processing.fragment.render.AnimationFragment;
-import com.tiggerbiggo.prima.processing.fragment.render.ImageRenderFragment;
 import com.tiggerbiggo.prima.processing.fragment.render.RenderFragment;
 import com.tiggerbiggo.prima.processing.fragment.transform.MandelFragment;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.ReconnectedEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import sun.misc.IOUtils;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
@@ -29,7 +24,10 @@ import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Scanner;
 
 
 public class Main extends ListenerAdapter
@@ -40,17 +38,13 @@ public class Main extends ListenerAdapter
     private static final String thicc = "卂乃匚刀乇下厶卄工丁长乚从\uD841口尸㔿尺丂丅凵リ山乂丫乙";
     private static final String alpha = "abcdefghijklmnopqrstuvwxyz";
 
+    private SubstitutionSet subs = new SubstitutionSet();
+
     public static void main(String[] args)
             throws LoginException, RateLimitedException
     {
         JDA jda = new JDABuilder(AccountType.BOT).setToken(TOKEN).buildAsync();
         jda.addEventListener(new Main());
-    }
-
-    @Override
-    public void onReconnect(ReconnectedEvent event) {
-        super.onReconnect(event);
-
     }
 
     @Override
@@ -60,6 +54,8 @@ public class Main extends ListenerAdapter
         {
             Message m = event.getMessage();
             String s = m.getContentRaw();
+            System.out.println(m.getAuthor() + s);
+            if(s.startsWith("!"))return;
             if(m.getAuthor().isBot()){
                 boolean t = false;
                 for(char c : thicc.toCharArray()){
@@ -67,12 +63,20 @@ public class Main extends ListenerAdapter
                         t = true;
                     }
                 }
-                System.out.println(convertThicc(s));
                 if(t) m.getChannel().sendMessage(convertThicc(s)).queue();
             }
             else if(s.startsWith(COMMAND)){
                 handleCommand(s.substring(COMMAND.length()), m);
             }
+            else if(Settings.subsEnabled){
+                doSubstitutions(m);
+            }
+        }
+    }
+
+    private void doSubstitutions(Message m) {
+        if(subs.contains(m.getContentRaw())){
+            m.getChannel().sendMessage(subs.replaceAll(m.getContentRaw())).queue();
         }
     }
 
@@ -86,14 +90,17 @@ public class Main extends ListenerAdapter
     public void handleCommand(String raw, Message m){
         int commandIndex = raw.indexOf(" ");
         String command, arg;
+        String[] args;
         boolean hasArgs = false;
         if(commandIndex == -1) {
             command = raw;
             arg = "";
+            args = new String[0];
         }
         else {
             command = raw.substring(0, commandIndex);
             arg = raw.substring(commandIndex+1);
+            args = arg.split(" ");
             hasArgs = true;
         }
 
@@ -102,10 +109,8 @@ public class Main extends ListenerAdapter
         switch(command){
             case "img":
                 Color c;
-                System.out.println(hasArgs);
                 if(!hasArgs) c = Color.BLACK;
                 else{
-                    System.out.println(arg);
                     c = parseColor(arg);
                 }
                 m.getChannel().sendMessage("here's a thing:").addFile(convertImg(generateImg(c)), "img.png").queue();
@@ -149,9 +154,48 @@ public class Main extends ListenerAdapter
                         .sendMessage("Here's an animated fractal:")
                         .addFile(arr, "anim.gif")
                         .queue();
+                break;
+            case "markov":
+                Markov mk = new Markov();
+
+                try{
+                    if(!hasArgs){
+                        mk.addToIndex(readFile("markov/sentences.txt"));
+                    }
+                    else{
+                        for(String s : args){
+                            mk.addToIndex(readFile("markov/" + s + ".txt"));
+                        }
+                    }
+                    m.getChannel().sendMessage(mk.generateSentence(1000)).queue();
+                }
+                catch(IOException ex){
+                    m.getChannel().sendMessage("Error occured: " + ex.getMessage()).queue();
+                }
 
                 break;
+            case "sub":
+                m.getChannel().sendMessage("Reloading substitutions...").queue();
+                subs = new SubstitutionSet(new File("substitutions.txt"));
+                m.getChannel().sendMessage("Done.").queue();
+                break;
+            case "unsub":
+                subs = new SubstitutionSet();
+                m.getChannel().sendMessage("Substitutions disabled.").queue();
+                break;
         }
+    }
+
+    public String readFile(String filename) throws IOException{
+        FileInputStream in = new FileInputStream(filename);
+        Scanner scan = new Scanner(in);
+
+        StringBuilder bu = new StringBuilder();
+
+        while(scan.hasNextLine()){
+            bu.append(scan.nextLine());
+        }
+        return bu.toString();
     }
 
     public Color parseColor(String arg){
@@ -160,9 +204,6 @@ public class Main extends ListenerAdapter
             r = Integer.parseInt(arg.substring(1, 3), 16);
             g = Integer.parseInt(arg.substring(3, 5), 16);
             b = Integer.parseInt(arg.substring(5, 7), 16);
-
-            System.out.println(r + ", " + g + ", " + b);
-
             return new Color(r, g, b);
         }
 
