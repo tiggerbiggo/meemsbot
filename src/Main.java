@@ -14,6 +14,7 @@ import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.ReconnectedEvent;
+import net.dv8tion.jda.core.events.emote.EmoteAddedEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -183,7 +184,16 @@ public class Main extends ListenerAdapter
                 subs = new SubstitutionSet();
                 m.getChannel().sendMessage("Substitutions disabled.").queue();
                 break;
+            case "react":
+                m.addReaction("😂").queue();
+                break;
+
         }
+    }
+
+    @Override
+    public void onEmoteAdded(EmoteAddedEvent event) {
+        super.onEmoteAdded(event);
     }
 
     public String readFile(String filename) throws IOException{
@@ -224,11 +234,7 @@ public class Main extends ListenerAdapter
     }
 
     public BufferedImage generateMandel(int w, int h, Color cA, Color cB){
-
-
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-
-
 
         for(int i=0; i<w; i++){
             for(int j=0; j<h; j++){

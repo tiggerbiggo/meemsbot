@@ -9,7 +9,7 @@ public class Substitution {
         return toCheck.contains(from);
     }
 
-    public String replace(String toReplace){
+    public String replace(String toReplace) {
         return toReplace.replace(from, to);
     }
 }
