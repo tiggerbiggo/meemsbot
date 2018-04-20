@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="meemsBot:jar">
+    <output-path>$PROJECT_DIR$/build</output-path>
+    <root id="archive" name="meemsBot.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/resources/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="meemsBot" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/JDA.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/Prima.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

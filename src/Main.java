@@ -13,18 +13,12 @@ import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.events.ReconnectedEvent;
-import net.dv8tion.jda.core.events.emote.EmoteAddedEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
 import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,7 +27,7 @@ import java.util.Scanner;
 
 public class Main extends ListenerAdapter
 {
-    private static final String TOKEN = "NDM1MzczMTY2ODExMTUyMzg1.DbYAmw.wragsMYwJNVDGRceVb-YA57ddpM";
+    private static final String TOKEN = Settings.getToken();
     private static final String COMMAND = "::";
 
     private static final String thicc = "卂乃匚刀乇下厶卄工丁长乚从\uD841口尸㔿尺丂丅凵リ山乂丫乙";
@@ -41,10 +35,11 @@ public class Main extends ListenerAdapter
 
     private SubstitutionSet subs = new SubstitutionSet();
 
-    public static void main(String[] args)
-            throws LoginException, RateLimitedException
+    public static JDA jda;
+
+    public static void main(String[] args) throws LoginException
     {
-        JDA jda = new JDABuilder(AccountType.BOT).setToken(TOKEN).buildAsync();
+        jda = new JDABuilder(AccountType.BOT).setToken(TOKEN).buildAsync();
         jda.addEventListener(new Main());
     }
 
@@ -114,7 +109,7 @@ public class Main extends ListenerAdapter
                 else{
                     c = parseColor(arg);
                 }
-                m.getChannel().sendMessage("here's a thing:").addFile(convertImg(generateImg(c)), "img.png").queue();
+                MessageTools.sendMessageWithImage("here's a thing:", "img.png", generateImg(c), m.getChannel());
                 break;
             case "kick":
                 if(m.getMentionedUsers().size() <=0) {
@@ -133,10 +128,12 @@ public class Main extends ListenerAdapter
                 break;
             case "mandel":
                 m.getChannel().sendMessage("Generating Fractal...").queue();
-                m.getChannel()
-                        .sendMessage("Here's a fractal:")
-                        .addFile(convertImg(generateMandel(200, 200, Color.BLACK, Color.white)), "img.png")
-                        .queue();
+                MessageTools.sendMessageWithImage(
+                        "Here's a Fractal",
+                        "img",
+                        generateMandel(200, 200, Color.BLACK, Color.white),
+                        m.getChannel());
+
                 break;
             case "mandelgif":
                 m.getChannel().sendMessage("Generating Fractal...").queue();
@@ -187,13 +184,13 @@ public class Main extends ListenerAdapter
             case "react":
                 m.addReaction("😂").queue();
                 break;
+            case "mantest":
+                //Message tmp = m.getChannel().sendMessage("tst").complete();
+                jda.addEventListener(new MandelMessage(m.getChannel()));
+                System.out.println("done.");
+                break;
 
         }
-    }
-
-    @Override
-    public void onEmoteAdded(EmoteAddedEvent event) {
-        super.onEmoteAdded(event);
     }
 
     public String readFile(String filename) throws IOException{
@@ -220,20 +217,10 @@ public class Main extends ListenerAdapter
         return Color.BLACK;
     }
 
-    public byte[] convertImg(BufferedImage img){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(img, "png", baos);
-            baos.flush();
-            byte[] toReturn = baos.toByteArray();
-            baos.close();
-            return toReturn;
-        }
-        catch (IOException e){}
-        return null;
-    }
+
 
     public BufferedImage generateMandel(int w, int h, Color cA, Color cB){
+
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
         for(int i=0; i<w; i++){
