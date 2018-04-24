@@ -1,3 +1,5 @@
+package text;
+
 public class Substitution {
     String from, to;
     public Substitution(String from, String to){

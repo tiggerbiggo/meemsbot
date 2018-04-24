@@ -1,7 +1,9 @@
+package reactlet;
+
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.core.events.role.GenericRoleEvent;
+import net.dv8tion.jda.core.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import java.util.ArrayList;
@@ -10,18 +12,26 @@ import java.util.List;
 /**
  * A Reactable message which links behaviours to discord reactions
  */
-public abstract class ReactableMessage extends ListenerAdapter{
+public class ReactableMessage extends ListenerAdapter{
     private List<ReactProcess> reactions;
     protected MessageChannel c;
-    protected Message m;
+    protected Message control;
+
+    private boolean add, remove;
 
     /**
      * Creates a new Reactable Message linked to a given channel
      * @param c The channel to post in
      */
-    public ReactableMessage(MessageChannel c){
+    public ReactableMessage(MessageChannel c, boolean add, boolean remove){
         this.c = c;
+        this.add = add;
+        this.remove = remove;
         reactions = new ArrayList<>();
+    }
+
+    public void setMessage(Message m){
+        control = m;
     }
 
     /**
@@ -34,6 +44,14 @@ public abstract class ReactableMessage extends ListenerAdapter{
     }
 
     /**
+     * Removes self from JDA listeners, and deletes the associated message
+     */
+    public void destroy(){
+        control.getJDA().removeEventListener(this);
+        control.delete().complete();
+    }
+
+    /**
      * Listens to reaction add events. If the event matches the correct message,
      * and was not reacted to by a bot, this method will trigger the appropriate
      * Reaction Process object.
@@ -41,23 +59,35 @@ public abstract class ReactableMessage extends ListenerAdapter{
      */
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent event){
+        if(!add) return;
         if(event.getUser().isBot())return;
-        if(!event.getMessageId().equals(m.getId())) return;
+        if(!event.getMessageId().equals(control.getId())) return;
 
-        String react = event.getReactionEmote().getName();
+        reactionPressed(event.getReactionEmote().getName());
+    }
+
+    @Override
+    public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
+        if(!remove) return;
+        if(event.getUser().isBot())return;
+        if(!event.getMessageId().equals(control.getId())) return;
+
+        reactionPressed(event.getReactionEmote().getName());
+    }
+
+    private void reactionPressed(String react){
         for(ReactProcess proc : reactions){
             if(proc.check(react))
                 break;
-
         }
     }
 
     /**
      * Adds all reactions to the message
      */
-    protected void doReactions(){
+    public void doReactions(){
         for(ReactProcess p : reactions){
-            m.addReaction(p.reaction).queue();
+            control.addReaction(p.reaction).complete();
         }
     }
 }

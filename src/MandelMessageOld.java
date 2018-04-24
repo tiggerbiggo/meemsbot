@@ -19,24 +19,24 @@ public class MandelMessageOld extends ListenerAdapter{
 
     private Vector2 offset;
     private double zoom;
-    private Message m;
+    private Message control;
 
-    public MandelMessageOld(Vector2 offset, double zoom, Message m) {
+    public MandelMessageOld(Vector2 offset, double zoom, Message control) {
         this.offset = offset;
         this.zoom = zoom;
-        this.m = m;
+        this.control = control;
 
-        m.addReaction(UL).queue();
-        m.addReaction(UR).queue();
-        m.addReaction(BL).queue();
-        m.addReaction(BR).queue();
+        control.addReaction(UL).queue();
+        control.addReaction(UR).queue();
+        control.addReaction(BL).queue();
+        control.addReaction(BR).queue();
     }
 
     public MandelMessageOld(MessageChannel channel){
         this(
                 new Vector2(-2),
                 0.25,
-                MessageTools.sendMessageWithImage(
+                core.MessageTools.sendMessageWithImage(
                         "Mandel: ",
                         "mandel.gif",
                         generate(W, H, Color.BLACK, Color.WHITE), channel));
@@ -84,16 +84,16 @@ public class MandelMessageOld extends ListenerAdapter{
         if(!event.getUser().isBot()){
             switch(event.getReactionEmote().getName()){
                 case UL:
-                    m.getChannel().sendMessage("UL").queue();
+                    control.getChannel().sendMessage("UL").queue();
                     break;
                 case UR:
-                    m.getChannel().sendMessage("UR").queue();
+                    control.getChannel().sendMessage("UR").queue();
                     break;
                 case BL:
-                    m.getChannel().sendMessage("BL").queue();
+                    control.getChannel().sendMessage("BL").queue();
                     break;
                 case BR:
-                    m.getChannel().sendMessage("BR").queue();
+                    control.getChannel().sendMessage("BR").queue();
                     break;
             }
         }

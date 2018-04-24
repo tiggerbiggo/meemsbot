@@ -1,3 +1,5 @@
+package text;
+
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -5,7 +7,7 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Markov
+ * text.Markov
  *
  */
 public class Markov {

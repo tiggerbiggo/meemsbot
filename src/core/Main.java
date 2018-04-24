@@ -1,3 +1,5 @@
+package core;
+
 import com.tiggerbiggo.prima.calculation.ColorTools;
 import com.tiggerbiggo.prima.core.Builder;
 import com.tiggerbiggo.prima.core.FileManager;
@@ -15,6 +17,9 @@ import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import reactlet.calculator.CalcMessage;
+import reactlet.mandel.MandelMessage;
+import text.*;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
@@ -185,11 +190,13 @@ public class Main extends ListenerAdapter
                 m.addReaction("😂").queue();
                 break;
             case "mantest":
-                //Message tmp = m.getChannel().sendMessage("tst").complete();
+                //Message tmp = control.getChannel().sendMessage("tst").complete();
                 jda.addEventListener(new MandelMessage(m.getChannel()));
                 System.out.println("done.");
                 break;
-
+            case "calc":
+                new CalcMessage(m.getChannel(), jda);
+                break;
         }
     }
 

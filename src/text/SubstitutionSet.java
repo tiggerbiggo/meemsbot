@@ -1,3 +1,5 @@
+package text;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,7 +23,7 @@ public class SubstitutionSet {
             }
         }
         catch(IOException | ArrayIndexOutOfBoundsException ex){
-            System.err.println("Error in SubstitutionSet Constructor: " + ex.getMessage());
+            System.err.println("Error in text.SubstitutionSet Constructor: " + ex.getMessage());
             set = new ArrayList<>();
         }
     }

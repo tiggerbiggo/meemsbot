@@ -1,8 +1,13 @@
+package reactlet.mandel;
+
 import com.tiggerbiggo.prima.calculation.Calculation;
 import com.tiggerbiggo.prima.calculation.ColorTools;
 import com.tiggerbiggo.prima.core.Vector2;
+import core.MessageTools;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import reactlet.ReactProcess;
+import reactlet.ReactableMessage;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -10,6 +15,8 @@ import java.awt.image.BufferedImage;
 public class MandelMessage extends ReactableMessage {
     private Vector2 offset;
     private double zoom;
+
+    Message m;
 
     private static final int W = 200;
     private static final int H = 200;
@@ -20,7 +27,7 @@ public class MandelMessage extends ReactableMessage {
     public static final String BR = "↘";
 
     public MandelMessage(MessageChannel c){
-        super(c);
+        super(c, true, true);
 
         offset = new Vector2(-2);
         zoom = 0.25;
@@ -70,10 +77,11 @@ public class MandelMessage extends ReactableMessage {
                 MessageTools.sendMessageAsync("Rendering...", m.getChannel());
                 m.getJDA().removeEventListener(this);
                 m.delete().complete();
+                control.delete().complete();
                 MessageTools.sendMessageWithImage(
                         "Rendered:",
                         "full",
-                        generate(1000,1000,Color.BLUE, Color.ORANGE),
+                        generate(1000,1000,Color.BLACK, Color.WHITE),
                         m.getChannel());
             }
         });
@@ -91,11 +99,13 @@ public class MandelMessage extends ReactableMessage {
             @Override
             protected void onReact() {
                 m.delete().complete();
+                control.delete().complete();
                 m.getJDA().removeEventListener(this);
             }
         });
 
         m = generateFractalMessage();
+        control = MessageTools.sendMessage("Controls:", c);
         doReactions();
     }
 
@@ -144,6 +154,5 @@ public class MandelMessage extends ReactableMessage {
     public void sendNextMessage() {
         m.delete().queue();
         m = generateFractalMessage();
-        doReactions();
     }
 }

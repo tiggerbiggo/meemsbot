@@ -1,3 +1,5 @@
+package reactlet;
+
 public abstract class ReactProcess {
     public String reaction;
 
