@@ -1,14 +1,5 @@
 package core;
 
-import com.tiggerbiggo.prima.calculation.ColorTools;
-import com.tiggerbiggo.prima.core.Builder;
-import com.tiggerbiggo.prima.core.FileManager;
-import com.tiggerbiggo.prima.core.Vector2;
-import com.tiggerbiggo.prima.graphics.HueCycleGradient;
-import com.tiggerbiggo.prima.processing.fragment.generate.MapGenFragment;
-import com.tiggerbiggo.prima.processing.fragment.render.AnimationFragment;
-import com.tiggerbiggo.prima.processing.fragment.render.RenderFragment;
-import com.tiggerbiggo.prima.processing.fragment.transform.MandelFragment;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -16,7 +7,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Scanner;
 import javax.security.auth.login.LoginException;
+
+import com.tiggerbiggo.primaplay.calculation.Vector2;
+import com.tiggerbiggo.primaplay.graphics.ColorTools;
+import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
@@ -40,12 +36,8 @@ public class Main extends ListenerAdapter {
   public static JDA jda;
 
   public static void main(String[] args) throws LoginException {
-    for (int i = 500; i < 520; i++) {
-      Comic c = XKCD.getComicFromURL("https://xkcd.com/" + i + "/info.0.json");
-      c.getDecriptions();
-    }
-    //jda = new JDABuilder(AccountType.BOT).setToken(TOKEN).buildAsync();
-    //jda.addEventListener(new Main());
+    jda = new JDABuilder(AccountType.BOT).setToken(TOKEN).buildAsync();
+    jda.addEventListener(new Main());
   }
 
   @Override
@@ -137,24 +129,6 @@ public class Main extends ListenerAdapter {
             generateMandel(200, 200, Color.BLACK, Color.white),
             m.getChannel());
 
-        break;
-      case "mandelgif":
-        m.getChannel().sendMessage("Generating Fractal...").queue();
-        MapGenFragment f = new MapGenFragment(Vector2.MINUSTWO, Vector2.TWO);
-        MandelFragment mandelFragment = new MandelFragment(f, 300, 0.1);
-        AnimationFragment anim = new AnimationFragment(mandelFragment, AnimationFragment.SIMPLE);
-        RenderFragment render = new RenderFragment(anim, new HueCycleGradient());
-
-        Builder b = new Builder(render, 200, 200, 30);
-        b.startBuild();
-        b.joinAll();
-
-        byte[] arr = FileManager.writeByteArray(b.getImgs());
-
-        m.getChannel()
-            .sendMessage("Here's an animated fractal:")
-            .addFile(arr, "anim.gif")
-            .queue();
         break;
       case "markov":
         Markov mk = new Markov();

@@ -4,15 +4,15 @@ import static com.tiggerbiggo.primaplay.core.Main.chain;
 
 import com.tiggerbiggo.primaplay.calculation.Vector2;
 import com.tiggerbiggo.primaplay.graphics.HueCycleGradient;
+import com.tiggerbiggo.primaplay.graphics.SimpleGradient;
 import com.tiggerbiggo.primaplay.node.core.NodeHasOutput;
 import com.tiggerbiggo.primaplay.node.core.RenderNode;
-import com.tiggerbiggo.primaplay.node.implemented.AnimationNode;
-import com.tiggerbiggo.primaplay.node.implemented.GradientNode;
-import com.tiggerbiggo.primaplay.node.implemented.MandelNode;
-import com.tiggerbiggo.primaplay.node.implemented.MapGenNode;
+import com.tiggerbiggo.primaplay.node.implemented.*;
 import core.MessageTools;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.function.Function;
+
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import reactlet.ReactProcess;
@@ -40,9 +40,18 @@ public class MandelMessage extends ReactableMessage {
     super(c, true, true);
 
     gen = new MapGenNode(Vector2.MINUSTWO, Vector2.TWO);
-    NodeHasOutput o = chain(gen, new MandelNode(500, 0.1));
-    o = chain(o, new GradientNode(new HueCycleGradient()));
-    o = chain(o, new AnimationNode());
+    NodeHasOutput o = chain(gen, new MandelNode(500, 0.03));
+    o = chain(o, new AnimationNode(new Function<Double, Vector2>() {
+      @Override
+      public Vector2 apply(Double aDouble) {
+        return new Vector2(1-aDouble);
+      }
+    }));
+    o = chain(o, new GradientNode(new SimpleGradient(Color.red, Color.blue, false)));
+    //o = chain(o, new GradientNode(new HueCycleGradient()));
+    o = chain(o, new SuperSampleNode(3));
+
+    r = new BasicRenderNode();
     r.link(o);
 
     offset = new Vector2(-2);
@@ -94,10 +103,10 @@ public class MandelMessage extends ReactableMessage {
         m.getJDA().removeEventListener(this);
         m.delete().complete();
         control.delete().complete();
-        MessageTools.sendMessageWithImage(
+        MessageTools.sendMessageWithGif(
             "Rendered:",
             "full",
-            generate(1000, 1000, Color.BLACK, Color.WHITE),
+            r.render(450, 450, 30),
             m.getChannel());
       }
     });

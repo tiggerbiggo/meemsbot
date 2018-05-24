@@ -74,6 +74,7 @@ class Comic{
       Character character = Character.getCharFromName(s.substring(0, s.indexOf(":")));
 
     }
+    return null;
   }
 }
 

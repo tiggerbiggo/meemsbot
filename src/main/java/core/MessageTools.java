@@ -1,5 +1,7 @@
 package core;
 
+import com.tiggerbiggo.primaplay.core.FileManager;
+import com.tiggerbiggo.primaplay.node.core.Renderer;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
@@ -20,6 +22,12 @@ public class MessageTools {
         byte[] converted = convertImg(img);
         if(converted == null) return c.sendMessage("Error: Attempted to send image message, convertImg returned null.").complete();
         return c.sendMessage(message).addFile(converted, imgTitle + ".png").complete();
+    }
+
+    public static Message sendMessageWithGif(String message, String imgTitle, BufferedImage[] imgs, MessageChannel c){
+        byte[] converted = FileManager.writeByteArray(imgs);
+        if(converted == null) return c.sendMessage("Error: Attempted to send image message, writeByteArray returned null.").complete();
+        return c.sendMessage(message).addFile(converted, imgTitle + ".gif").complete();
     }
 
     public static byte[] convertImg(BufferedImage img){
