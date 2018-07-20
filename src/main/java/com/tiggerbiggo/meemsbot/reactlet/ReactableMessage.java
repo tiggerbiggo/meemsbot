@@ -1,7 +1,8 @@
-package reactlet;
+package com.tiggerbiggo.meemsbot.reactlet;
 
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -27,6 +28,7 @@ public class ReactableMessage extends ListenerAdapter{
         this.c = c;
         this.add = add;
         this.remove = remove;
+        c.getJDA().addEventListener(this);
         reactions = new ArrayList<>();
     }
 
@@ -63,7 +65,7 @@ public class ReactableMessage extends ListenerAdapter{
         if(event.getUser().isBot())return;
         if(!event.getMessageId().equals(control.getId())) return;
 
-        reactionPressed(event.getReactionEmote().getName());
+        reactionPressed(event.getReactionEmote().getName(), event);
     }
 
     @Override
@@ -72,12 +74,12 @@ public class ReactableMessage extends ListenerAdapter{
         if(event.getUser().isBot())return;
         if(!event.getMessageId().equals(control.getId())) return;
 
-        reactionPressed(event.getReactionEmote().getName());
+        reactionPressed(event.getReactionEmote().getName(), event);
     }
 
-    private void reactionPressed(String react){
+    private void reactionPressed(String react, GenericMessageReactionEvent e){
         for(ReactProcess proc : reactions){
-            if(proc.check(react))
+            if(proc.check(react, e))
                 break;
         }
     }

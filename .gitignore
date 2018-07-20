@@ -1,6 +1,5 @@
 TOKEN.tok
 *.tok
-*.java
 .idea/
 build/
 lib/

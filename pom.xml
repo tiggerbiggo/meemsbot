@@ -26,6 +26,11 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>jcenter</id>
+            <name>jcenter-bintray</name>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -39,6 +44,11 @@
             <groupId>com.github.tiggerbiggo</groupId>
             <artifactId>Primaplay</artifactId>
             <version>e95cfbb</version>
+        </dependency>
+        <dependency>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>3.6.0_354</version>
         </dependency>
     </dependencies>
 

@@ -1,22 +1,22 @@
-package reactlet.mandel;
+package old.reactlet.mandel;
 
 import static com.tiggerbiggo.primaplay.core.Main.chain;
 
 import com.tiggerbiggo.primaplay.calculation.Vector2;
-import com.tiggerbiggo.primaplay.graphics.HueCycleGradient;
 import com.tiggerbiggo.primaplay.graphics.SimpleGradient;
 import com.tiggerbiggo.primaplay.node.core.NodeHasOutput;
 import com.tiggerbiggo.primaplay.node.core.RenderNode;
 import com.tiggerbiggo.primaplay.node.implemented.*;
-import core.MessageTools;
+import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
+import old.core.MessageTools;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import reactlet.ReactProcess;
-import reactlet.ReactableMessage;
+import com.tiggerbiggo.meemsbot.reactlet.ReactProcess;
+import com.tiggerbiggo.meemsbot.reactlet.ReactableMessage;
 
 public class MandelMessage extends ReactableMessage {
 
@@ -36,8 +36,12 @@ public class MandelMessage extends ReactableMessage {
   public static final String BL = "↙";
   public static final String BR = "↘";
 
+  Vector2 A, B;
+
   public MandelMessage(MessageChannel c) {
     super(c, true, true);
+
+    A = B = Vector2.ZERO;
 
     gen = new MapGenNode(Vector2.MINUSTWO, Vector2.TWO);
     NodeHasOutput o = chain(gen, new MandelNode(500, 0.03));
@@ -47,7 +51,7 @@ public class MandelMessage extends ReactableMessage {
         return new Vector2(1-aDouble);
       }
     }));
-    o = chain(o, new GradientNode(new SimpleGradient(Color.red, Color.blue, false)));
+    o = chain(o, new GradientNode(new SimpleGradient(Color.green, Color.blue, true)));
     //o = chain(o, new GradientNode(new HueCycleGradient()));
     o = chain(o, new SuperSampleNode(3));
 
@@ -59,7 +63,8 @@ public class MandelMessage extends ReactableMessage {
 
     addReactProcess(new ReactProcess(BL) {
       @Override
-      protected void onReact() {
+      protected void onReact(
+          GenericMessageReactionEvent e) {
         double delt = 1 / (2 * zoom);
         offset = Vector2.add(offset, new Vector2(0, delt));
         zoom *= 2;
@@ -69,7 +74,8 @@ public class MandelMessage extends ReactableMessage {
 
     addReactProcess(new ReactProcess(BR) {
       @Override
-      protected void onReact() {
+      protected void onReact(
+          GenericMessageReactionEvent e) {
         double delt = 1 / (2 * zoom);
         offset = Vector2.add(offset, new Vector2(delt));
         zoom *= 2;
@@ -79,7 +85,8 @@ public class MandelMessage extends ReactableMessage {
 
     addReactProcess(new ReactProcess(UL) {
       @Override
-      protected void onReact() {
+      protected void onReact(
+          GenericMessageReactionEvent e) {
         offset = Vector2.add(offset, new Vector2(0));
         zoom *= 2;
         sendNextMessage();
@@ -88,7 +95,8 @@ public class MandelMessage extends ReactableMessage {
 
     addReactProcess(new ReactProcess(UR) {
       @Override
-      protected void onReact() {
+      protected void onReact(
+          GenericMessageReactionEvent e) {
         double delt = 1 / (2 * zoom);
         offset = Vector2.add(offset, new Vector2(delt, 0));
         zoom *= 2;
@@ -98,7 +106,8 @@ public class MandelMessage extends ReactableMessage {
 
     addReactProcess(new ReactProcess("\uD83D\uDCF7") { //render
       @Override
-      protected void onReact() {
+      protected void onReact(
+          GenericMessageReactionEvent e) {
         MessageTools.sendMessageAsync("Rendering...", m.getChannel());
         m.getJDA().removeEventListener(this);
         m.delete().complete();
@@ -108,12 +117,15 @@ public class MandelMessage extends ReactableMessage {
             "full",
             r.render(450, 450, 30),
             m.getChannel());
+        MessageTools.sendMessage("A: " + A.toString(), m.getChannel());
+        MessageTools.sendMessage("B: " + B.toString(), m.getChannel());
       }
     });
 
     addReactProcess(new ReactProcess("\uD83D\uDD01") { //reset
       @Override
-      protected void onReact() {
+      protected void onReact(
+          GenericMessageReactionEvent e) {
         offset = new Vector2(-2);
         zoom = 0.25;
         sendNextMessage();
@@ -122,7 +134,8 @@ public class MandelMessage extends ReactableMessage {
 
     addReactProcess(new ReactProcess("❎") {
       @Override
-      protected void onReact() {
+      protected void onReact(
+          GenericMessageReactionEvent e) {
         m.delete().complete();
         control.delete().complete();
         m.getJDA().removeEventListener(this);
@@ -142,7 +155,7 @@ public class MandelMessage extends ReactableMessage {
   public BufferedImage generate(int w, int h, Color cA, Color cB) {
     BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
-    Vector2 A, B;
+
     A = Vector2.ZERO;
     B = Vector2.ONE;
 

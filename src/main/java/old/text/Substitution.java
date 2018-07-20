@@ -1,4 +1,4 @@
-package text;
+package old.text;
 
 public class Substitution {
     String from, to;

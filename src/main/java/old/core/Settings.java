@@ -1,4 +1,4 @@
-package core;
+package old.core;
 
 import java.io.FileInputStream;
 import java.io.IOException;

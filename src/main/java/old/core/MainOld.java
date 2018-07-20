@@ -1,4 +1,4 @@
-package core;
+package old.core;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -18,12 +18,12 @@ import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import reactlet.mandel.MandelMessage;
-import text.Markov;
-import text.SubstitutionSet;
+import old.reactlet.mandel.MandelMessage;
+import old.text.Markov;
+import old.text.SubstitutionSet;
 
 
-public class Main extends ListenerAdapter {
+public class MainOld extends ListenerAdapter {
 
   private static final String TOKEN = Settings.getToken();
   private static final String COMMAND = "::";
@@ -37,7 +37,7 @@ public class Main extends ListenerAdapter {
 
   public static void main(String[] args) throws LoginException {
     jda = new JDABuilder(AccountType.BOT).setToken(TOKEN).buildAsync();
-    jda.addEventListener(new Main());
+    jda.addEventListener(new MainOld());
   }
 
   @Override

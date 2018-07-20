@@ -1,7 +1,6 @@
-package core;
+package old.core;
 
 import com.tiggerbiggo.primaplay.core.FileManager;
-import com.tiggerbiggo.primaplay.node.core.Renderer;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 
